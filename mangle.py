@@ -45,6 +45,9 @@ def leetify(pword):
 
 def mangler(args):
     mangled = list(args.string)
+    series = ('1', '12', '123', '1234', '12345', '123456', '!', '@', '#', '$', '%')
+    year = datetime.datetime.now().year
+    series += tuple((str(year - i) for i in xrange(3)))
     perm = False
     l = len(mangled)
     if l > 1:
@@ -64,23 +67,14 @@ def mangler(args):
             leeted = leetify(mangled[i])
             if (leeted is not None) and (leeted not in mangled):
                 mangled.append(leetify(mangled[i]))
-    if args.append or args.prepend:
-        series = ('1', '12', '123', '1234', '12345', '123456', '!', '@', '#', '$', '%')
-        year = datetime.datetime.now().year
-        series += tuple((str(year - i) for i in xrange(3)))
-        for i in xrange(len(mangled)):
-            if args.append:
-                mangled.extend([(mangled[i] + k) for k in series])
-            if args.prepend:
-                mangled.extend([(k + mangled[i]) for k in series])
+    for i in xrange(len(mangled)):
+        mangled += [(mangled[i] + k) for k in series] + [(k + mangled[i]) for k in series]
     return mangled
 
 
 def main():
     parser = argparse.ArgumentParser(description='Simple brute-force / fuzzing dictionary generator')
     parser.add_argument('string', nargs='+')
-    parser.add_argument('-a', '--append', action='store_true', default=False, help='Append stuff')
-    parser.add_argument('-p', '--prepend', action='store_true', default=False, help='Prepend stuff')
     parser.add_argument('-b', '--bad', action='store_true', default=False, help='Include a list of bad passwords')
     parser.add_argument('-l', '--leet', action='store_true', default=False, help='l3371fy')
     parser.add_argument('-o', '--outfile', nargs='?', type=argparse.FileType('a'), dest='FILE', const='mangle.dic',
